@@ -1,0 +1,24 @@
+{
+  "name": "warg",
+  "version": "1.0.0",
+  "description": "Synchronous streams",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test.js | faucet"
+  },
+  "keywords": [
+    "stream",
+    "reactive",
+    "rx"
+  ],
+  "author": "TehShrike",
+  "license": "WTFPL",
+  "devDependencies": {
+    "faucet": "0.0.1",
+    "zora": "2.0.1"
+  },
+  "dependencies": {
+    "better-emitter": "2.1.1",
+    "onetime": "2.0.1"
+  }
+}
