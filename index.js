@@ -8,7 +8,7 @@ const value = (value = null) => {
 		set(newValue) {
 			emitter.emit(`dirty`)
 			value = newValue
-			emitter.emit(`resolved`)
+			emitter.emit(`value`, value)
 		},
 		locked() {
 			return false
@@ -18,40 +18,29 @@ const value = (value = null) => {
 	return emitter
 }
 
-const recalculate = (dependencies, calculation) => {
-	const resolvedDependencies = {}
-
-	Object.entries(dependencies).forEach(([ key, dependency ]) => {
-		resolvedDependencies[key] = dependency.get()
-	})
-
-	return calculation(resolvedDependencies)
-}
-
-const allDependenciesAreUnlocked = dependencies => Object.values(dependencies).every(dependency => !dependency.locked())
-
-const onEventFromAnyDependency = (dependencies, event, cb) => {
-	Object.values(dependencies).forEach(dependency => {
-		dependency.on(event, cb)
-	})
-}
-
-
-const computed = (dependencies, calculation) => {
+const combine = dependencies => {
 	Object.freeze(dependencies)
-	let value = recalculate(dependencies, calculation)
+	let value = resolve(dependencies)
 	let locked = false
 
-	onEventFromAnyDependency(dependencies, `dirty`, () => {
+	const setDirty = () => {
 		locked = true
 		emitter.emit(`dirty`)
-	})
+	}
 
-	onEventFromAnyDependency(dependencies, `resolved`, () => {
+	onEventFromAnyDependency(dependencies, `dirty`, setDirty)
+
+	onEventFromAnyDependency(dependencies, `value`, () => {
+		if (!locked) {
+			setDirty()
+		}
+
 		if (allDependenciesAreUnlocked(dependencies)) {
-			value = recalculate(dependencies, calculation)
+			console.log(`updating combination:`)
+			value = resolve(dependencies)
+			console.log(`became`, value)
 			locked = false
-			emitter.emit(`resolved`)
+			emitter.emit(`value`, value)
 		}
 	})
 
@@ -64,7 +53,7 @@ const computed = (dependencies, calculation) => {
 			return value
 		},
 		set() {
-			throw new Error(`Computed values may not be set`)
+			throw new Error(`Combinations may not be set`)
 		},
 		locked() {
 			return locked
@@ -74,42 +63,53 @@ const computed = (dependencies, calculation) => {
 	return emitter
 }
 
-const arbitrary = arbitraryFn => {
-	let locked = false
-	const setDirty = () => {
-		emitter.emit(`dirty`)
-		locked = true
-	}
-	const setValue = newValue => {
-		value = newValue
-		locked = false
-		emitter.emit(`resolved`)
-	}
+const transform = (dependencies, fn) => {
+	const combined = combine(dependencies)
+	const observableValue = value()
 
-	let value = arbitraryFn(setDirty, setValue)
+	const onValueChange = fn(observableValue.set)
 
-	const emitter = makeEmitter({
-		get() {
-			if (locked) {
-				throw new Error(`Unreadable!`)
-			}
+	onValueChange(combined.get())
 
-			return value
-		},
+	combined.on(`value`, onValueChange)
+
+	return Object.assign(Object.create(observableValue), {
 		set() {
-			throw new Error(`Arbitary function streams may not be set`)
-		},
-		locked() {
-			return locked
+			throw new Error(`Transforms may not be set`)
 		},
 	})
-
-	return emitter
 }
+
+const computed = (dependencies, calculation) => transform(
+	dependencies,
+	setValue => dependencyValues => setValue(calculation(dependencyValues))
+)
 
 
 module.exports = {
 	value,
+	combine,
+	transform,
 	computed,
-	arbitrary,
 }
+
+const resolve = dependencies => {
+	const resolvedDependencies = {}
+
+	Object.entries(dependencies).forEach(([ key, dependency ]) => {
+		resolvedDependencies[key] = dependency.get()
+	})
+
+	return resolvedDependencies
+}
+
+const allDependenciesAreUnlocked = dependencies => Object.values(dependencies).every(
+	dependency => !dependency.locked()
+)
+
+const onEventFromAnyDependency = (dependencies, event, cb) => {
+	Object.values(dependencies).forEach(dependency => {
+		dependency.on(event, cb)
+	})
+}
+

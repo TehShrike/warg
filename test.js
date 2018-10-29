@@ -1,5 +1,5 @@
 const test = require(`zora`)
-const { value, computed, arbitrary } = require(`./`)
+const { value, computed, transform } = require(`./`)
 
 test(`some forking case`, t => {
 	const a = value(1)
@@ -15,51 +15,41 @@ test(`some forking case`, t => {
 		return aDoubled + bDoubled
 	})
 
-	t.equal(recombinedComputedCalculations, 1)
-	t.equal(recombined.get(), 6)
+	t.equal(recombinedComputedCalculations, 1, `1 calculation so far`)
+	t.equal(recombined.get(), 6, `recombined value is 6`)
 	a.set(3)
-	t.equal(recombinedComputedCalculations, 2)
-	t.equal(recombined.get(), 10)
+	t.equal(recombinedComputedCalculations, 2, `2 calculations so far`)
+	t.equal(recombined.get(), 10, `recombined value is 10`)
 })
 
-const makeCrazyStreamContraption = streamOfStreams => arbitrary((setDirty, setValue) => {
-	let unsubscribe = null
+test(`can I implement filter`, t => {
+	const a = value(1)
 
-	const setUpSubscription = stream => {
-		const latestValueSubscription = stream.on(`resolved`, () => setValue(stream.get()))
-		const latestDirtySubscription = stream.on(`dirty`, setDirty)
-		unsubscribe = () => {
-			latestValueSubscription()
-			latestDirtySubscription()
+	const filter = (dependencies, condition) => transform(dependencies, set => dependencyValues => {
+		if (condition(dependencyValues)) {
+			set(dependencyValues)
 		}
-	}
-	setUpSubscription(streamOfStreams.get())
-
-	streamOfStreams.on(`resolved`, () => {
-		unsubscribe()
-		setUpSubscription(streamOfStreams.get())
 	})
 
-	return streamOfStreams.get().get()
+	const even = filter({ a }, ({ a }) => (a % 2) === 0)
+
+	t.equal(even.get(), null, `The initial value of even should be null`)
+
+	let firstListenerFired = false
+	even.once(`value`, ({ a }) => {
+		firstListenerFired = true
+		t.equal(a, 4, `The even stream first fires with a value of 4`)
+	})
+
+	a.set(4)
+
+	t.ok(firstListenerFired, `The first event listener fired`)
+	t.equal(even.get().a, 4, `The current value of the even stream is 4`)
+
+	even.once(`value`, () => {
+		t.fail()
+	})
+	a.set(3)
+	t.equal(even.get().a, 4, `Even though its depenant changed to 3, the value of the even stream is still 4`)
 })
 
-test(`A stream that emits streams, and a stream that is the value of whatever the last emitted thing was`, t => {
-	const a = value(0)
-	const doubled = computed({ a }, ({ a }) => a * 2)
-	const streamOfStreams = value(a)
-
-	const latestThingEmittedFromStream = makeCrazyStreamContraption(streamOfStreams)
-
-	t.equal(latestThingEmittedFromStream.get(), 0)
-	const b = value(1)
-	streamOfStreams.set(b)
-	t.equal(latestThingEmittedFromStream.get(), 0, `Still returns the old value for some weird reason`)
-	b.set(2)
-	t.equal(latestThingEmittedFromStream.get(), 2, `Now it returns the new value for some weird reason`)
-
-	streamOfStreams.set(doubled)
-	t.equal(latestThingEmittedFromStream.get(), 0)
-
-	a.set(1)
-	t.equal(latestThingEmittedFromStream.get(), 2)
-})
