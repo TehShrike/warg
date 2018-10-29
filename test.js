@@ -21,3 +21,13 @@ test(`some forking case`, t => {
 	t.equal(recombinedComputedCalculations, 2)
 	t.equal(recombined.get(), 10)
 })
+
+test(`A stream that emits streams, and a stream that is the value of whatever the last emitted thing was`, t => {
+	const streamOfStreams = value(value(0))
+
+	const latestThingEmittedFromStream = computed({ streamOfStreams }, ({ streamOfStreams }) => streamOfStreams.get())
+
+	t.equal(latestThingEmittedFromStream.get(), 0)
+	streamOfStreams.set(value(1))
+	t.equal(latestThingEmittedFromStream.get(), 1)
+})
