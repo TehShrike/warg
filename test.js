@@ -1,5 +1,5 @@
 const test = require(`zora`)
-const { value, computed } = require(`./`)
+const { value, computed, arbitrary } = require(`./`)
 
 test(`some forking case`, t => {
 	const a = value(1)
@@ -22,12 +22,44 @@ test(`some forking case`, t => {
 	t.equal(recombined.get(), 10)
 })
 
-test(`A stream that emits streams, and a stream that is the value of whatever the last emitted thing was`, t => {
-	const streamOfStreams = value(value(0))
+const makeCrazyStreamContraption = streamOfStreams => arbitrary((setDirty, setValue) => {
+	let unsubscribe = null
 
-	const latestThingEmittedFromStream = computed({ streamOfStreams }, ({ streamOfStreams }) => streamOfStreams.get())
+	const setUpSubscription = stream => {
+		const latestValueSubscription = stream.on(`resolved`, () => setValue(stream.get()))
+		const latestDirtySubscription = stream.on(`dirty`, setDirty)
+		unsubscribe = () => {
+			latestValueSubscription()
+			latestDirtySubscription()
+		}
+	}
+	setUpSubscription(streamOfStreams.get())
+
+	streamOfStreams.on(`resolved`, () => {
+		unsubscribe()
+		setUpSubscription(streamOfStreams.get())
+	})
+
+	return streamOfStreams.get().get()
+})
+
+test(`A stream that emits streams, and a stream that is the value of whatever the last emitted thing was`, t => {
+	const a = value(0)
+	const doubled = computed({ a }, ({ a }) => a * 2)
+	const streamOfStreams = value(a)
+
+	const latestThingEmittedFromStream = makeCrazyStreamContraption(streamOfStreams)
 
 	t.equal(latestThingEmittedFromStream.get(), 0)
-	streamOfStreams.set(value(1))
-	t.equal(latestThingEmittedFromStream.get(), 1)
+	const b = value(1)
+	streamOfStreams.set(b)
+	t.equal(latestThingEmittedFromStream.get(), 0, `Still returns the old value for some weird reason`)
+	b.set(2)
+	t.equal(latestThingEmittedFromStream.get(), 2, `Now it returns the new value for some weird reason`)
+
+	streamOfStreams.set(doubled)
+	t.equal(latestThingEmittedFromStream.get(), 0)
+
+	a.set(1)
+	t.equal(latestThingEmittedFromStream.get(), 2)
 })

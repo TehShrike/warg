@@ -74,8 +74,42 @@ const computed = (dependencies, calculation) => {
 	return emitter
 }
 
+const arbitrary = arbitraryFn => {
+	let locked = false
+	const setDirty = () => {
+		emitter.emit(`dirty`)
+		locked = true
+	}
+	const setValue = newValue => {
+		value = newValue
+		locked = false
+		emitter.emit(`resolved`)
+	}
+
+	let value = arbitraryFn(setDirty, setValue)
+
+	const emitter = makeEmitter({
+		get() {
+			if (locked) {
+				throw new Error(`Unreadable!`)
+			}
+
+			return value
+		},
+		set() {
+			throw new Error(`Arbitary function streams may not be set`)
+		},
+		locked() {
+			return locked
+		},
+	})
+
+	return emitter
+}
+
 
 module.exports = {
 	value,
 	computed,
+	arbitrary,
 }
