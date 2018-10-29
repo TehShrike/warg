@@ -18,7 +18,6 @@
     "zora": "2.0.1"
   },
   "dependencies": {
-    "better-emitter": "2.1.1",
-    "onetime": "2.0.1"
+    "better-emitter": "2.1.1"
   }
 }
