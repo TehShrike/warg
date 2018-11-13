@@ -1,5 +1,5 @@
 const test = require(`zora`)
-const { value, computed, transform } = require(`./`)
+const { value, computed } = require(`./`)
 
 test(`some forking case`, t => {
 	const a = value(1)
@@ -22,34 +22,68 @@ test(`some forking case`, t => {
 	t.equal(recombined.get(), 10, `recombined value is 10`)
 })
 
-test(`can I implement filter`, t => {
+test(`subscribe method`, t => {
 	const a = value(1)
 
-	const filter = (dependencies, condition) => transform(dependencies, set => dependencyValues => {
-		if (condition(dependencyValues)) {
-			set(dependencyValues)
+	const tripled = computed({ a }, ({ a }) => a * 3)
+
+	let aCalls = 0
+	const aUnsubscribe = a.subscribe(value => {
+		if (aCalls === 0) {
+			t.equal(value, 1)
+		} else if (aCalls === 1) {
+			t.equal(value, 2)
+		} else {
+			t.fail(`a.subscribe callback called too many times`)
 		}
+
+		aCalls++
 	})
 
-	const even = filter({ a }, ({ a }) => (a % 2) === 0)
+	t.equal(aCalls, 1)
 
-	t.equal(even.get(), null, `The initial value of even should be null`)
+	let tripledCalls = 0
+	const tripledUnsubscribe = tripled.subscribe(value => {
+		if (tripledCalls === 0) {
+			t.equal(value, 3)
+		} else if (tripledCalls === 1) {
+			t.equal(value, 6)
+		} else {
+			t.fail(`tripled.subscribe callback called too many times`)
+		}
 
-	let firstListenerFired = false
-	even.once(`value`, ({ a }) => {
-		firstListenerFired = true
-		t.equal(a, 4, `The even stream first fires with a value of 4`)
+		tripledCalls++
 	})
 
-	a.set(4)
+	t.equal(tripledCalls, 1)
 
-	t.ok(firstListenerFired, `The first event listener fired`)
-	t.equal(even.get().a, 4, `The current value of the even stream is 4`)
+	a.set(2)
 
-	even.once(`value`, () => {
-		t.fail()
-	})
+	t.equal(aCalls, 2)
+	t.equal(tripledCalls, 2)
+
+	aUnsubscribe()
+	tripledUnsubscribe()
+
 	a.set(3)
-	t.equal(even.get().a, 4, `Even though its depenant changed to 3, the value of the even stream is still 4`)
+
+	t.equal(aCalls, 2)
+	t.equal(tripledCalls, 2)
 })
 
+test(`map`, t => {
+	const makeExciting = str => str + `!`
+	const word = value(`hi`)
+	const loud = computed({ word }, ({ word }) => word.toUpperCase())
+
+	const exciting = word.map(makeExciting)
+	const loudExciting = loud.map(makeExciting)
+
+	t.equal(exciting.get(), `hi!`)
+	t.equal(loudExciting.get(), `HI!`)
+
+	word.set(`what`)
+
+	t.equal(exciting.get(), `what!`)
+	t.equal(loudExciting.get(), `WHAT!`)
+})

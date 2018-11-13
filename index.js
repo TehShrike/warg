@@ -15,7 +15,7 @@ const value = (value = null) => {
 		},
 	})
 
-	return emitter
+	return addHelpers(emitter)
 }
 
 const combine = dependencies => {
@@ -36,9 +36,7 @@ const combine = dependencies => {
 		}
 
 		if (allDependenciesAreUnlocked(dependencies)) {
-			console.log(`updating combination:`)
 			value = resolve(dependencies)
-			console.log(`became`, value)
 			locked = false
 			emitter.emit(`value`, value)
 		}
@@ -73,7 +71,7 @@ const transform = (dependencies, fn) => {
 
 	combined.on(`value`, onValueChange)
 
-	return Object.assign(Object.create(observableValue), {
+	return Object.assign(addHelpers(observableValue), {
 		set() {
 			throw new Error(`Transforms may not be set`)
 		},
@@ -85,11 +83,8 @@ const computed = (dependencies, calculation) => transform(
 	setValue => dependencyValues => setValue(calculation(dependencyValues))
 )
 
-
 module.exports = {
 	value,
-	combine,
-	transform,
 	computed,
 }
 
@@ -113,3 +108,15 @@ const onEventFromAnyDependency = (dependencies, event, cb) => {
 	})
 }
 
+const addHelpers = observable => Object.assign({}, observable, {
+	subscribe(cb) {
+		const unsubscribe = observable.on(`value`, cb)
+
+		cb(observable.get())
+
+		return unsubscribe
+	},
+	map(fn) {
+		return computed({ observable }, ({ observable }) => fn(observable))
+	},
+})
