@@ -107,6 +107,6 @@ These events are fired:
 
 Because warg resolves all changes synchronously in the same tick, you should never need to worry about values becoming dirty and resolving themselves.  That all happens behind the scenes before your `set` call completes.
 
-# License
+## License
 
 [WTFPL](http://wtfpl2.com)
