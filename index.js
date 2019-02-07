@@ -61,11 +61,11 @@ const combine = dependencies => {
 	return emitter
 }
 
-const transform = (dependencies, fn) => {
+const computed = (dependencies, calculation) => {
 	const combined = combine(dependencies)
 	const observableValue = value()
 
-	const onValueChange = fn(observableValue.set)
+	const onValueChange = dependencyValues => observableValue.set(calculation(dependencyValues))
 
 	onValueChange(combined.get())
 
@@ -77,11 +77,6 @@ const transform = (dependencies, fn) => {
 		},
 	})
 }
-
-const computed = (dependencies, calculation) => transform(
-	dependencies,
-	setValue => dependencyValues => setValue(calculation(dependencyValues))
-)
 
 module.exports = {
 	value,
