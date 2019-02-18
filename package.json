@@ -6,6 +6,10 @@
   "scripts": {
     "test": "node test.js | faucet && jsmd readme.md"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TehShrike/warg.git"
+  },
   "keywords": [
     "stream",
     "reactive",
