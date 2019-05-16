@@ -1,6 +1,6 @@
 {
   "name": "warg",
-  "version": "1.1.2",
+  "version": "1.2.0",
   "description": "A basic stream/reactive library designed to make dirty reads impossible",
   "main": "index.js",
   "module": "index.mjs",
