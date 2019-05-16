@@ -10,8 +10,14 @@ This library runs calculations synchronously and eagerly.  If you have a ton of 
 npm i warg
 ```
 
+CommonJS:
 ```
 const { value, computed } = require('warg')
+```
+
+ESM:
+```
+import { value, computed } from 'warg'
 ```
 
 <!--js
