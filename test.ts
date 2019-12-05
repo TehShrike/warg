@@ -1,5 +1,5 @@
-const test = require(`zora`)
-const { value, computed } = require(`./`)
+import { test } from 'zora'
+import { value, computed } from './index'
 
 test(`some forking case`, t => {
 	const a = value(1)

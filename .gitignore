@@ -1,2 +1,4 @@
 node_modules
 index.mjs
+index.cjs
+index.d.ts

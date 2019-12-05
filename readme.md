@@ -21,7 +21,7 @@ import { value, computed } from 'warg'
 ```
 
 <!--js
-const { value, computed } = require('./')
+const { value, computed } = require('./index.cjs')
 -->
 
 ## Examples

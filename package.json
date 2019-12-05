@@ -2,10 +2,12 @@
   "name": "warg",
   "version": "1.2.2",
   "description": "A basic stream/reactive library designed to make dirty reads impossible",
-  "main": "index.js",
+  "main": "index.cjs",
   "module": "index.mjs",
   "scripts": {
-    "test": "node test.js | faucet && jsmd readme.md",
+    "test": "npm run test:unit && npm run test:types",
+    "test:unit": "npm run build && rollup -c rollup.test.config.js | node | faucet && jsmd readme.md",
+    "test:types": "tsc --noEmit -p ./tsconfig.json && tsc --noEmit ./test.ts",
     "build": "rollup -c"
   },
   "repository": {
@@ -22,10 +24,12 @@
   "devDependencies": {
     "faucet": "0.0.1",
     "jsmd": "1.0.1",
-    "rollup": "1.12.0",
-    "rollup-plugin-commonjs": "10.0.0",
-    "rollup-plugin-node-resolve": "5.0.0",
-    "zora": "2.0.1"
+    "rollup": "^1.27.8",
+    "rollup-plugin-commonjs": "^10.1.0",
+    "rollup-plugin-node-resolve": "^5.2.0",
+    "rollup-plugin-typescript": "^1.0.1",
+    "typescript": "^3.7.3",
+    "zora": "^3.1.6"
   },
   "dependencies": {
     "better-emitter": "2.1.1"
