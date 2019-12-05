@@ -1,3 +1,8 @@
+# 2.0.1
+
+- Move `better-emitter` to dev dependencies since it's getting inlined into the builds post-TypeScript
+- Upgrade `better-emitter` to rely on the type definitions that ship with it since 2.2.1
+
 # 2.0.0
 
 The TypeScript rewrite!  Technically comes with a breaking change, though in practice I doubt it will matter to anyone.

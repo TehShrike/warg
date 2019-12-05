@@ -22,6 +22,7 @@
   "author": "TehShrike",
   "license": "WTFPL",
   "devDependencies": {
+    "better-emitter": "^2.2.2",
     "faucet": "0.0.1",
     "jsmd": "1.0.1",
     "rollup": "^1.27.8",
@@ -31,7 +32,5 @@
     "typescript": "^3.7.3",
     "zora": "^3.1.6"
   },
-  "dependencies": {
-    "better-emitter": "2.1.1"
-  }
+  "dependencies": {}
 }
