@@ -8,7 +8,7 @@
     "test": "npm run test:unit && npm run test:types",
     "test:unit": "npm run build && rollup -c rollup.test.config.js | node | faucet && jsmd readme.md",
     "test:types": "tsc --noEmit -p ./tsconfig.json && tsc --noEmit ./test.ts",
-    "build": "rollup -c"
+    "build": "tsc --declaration --emitDeclarationOnly && rollup -c"
   },
   "repository": {
     "type": "git",

@@ -1,3 +1,7 @@
+# 2.0.2
+
+- Generate type definitions
+
 # 2.0.1
 
 - Move `better-emitter` to dev dependencies since it's getting inlined into the builds post-TypeScript
