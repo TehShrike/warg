@@ -22,7 +22,7 @@
   "author": "TehShrike",
   "license": "WTFPL",
   "devDependencies": {
-    "better-emitter": "^2.2.2",
+    "better-emitter": "^2.3.0",
     "faucet": "0.0.1",
     "jsmd": "1.0.1",
     "rollup": "^1.27.8",
