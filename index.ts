@@ -1,12 +1,12 @@
 import makeEmitter, { Emitter } from 'better-emitter'
 
-interface BasicObservable<T> extends Emitter {
+export interface BasicObservable<T> extends Emitter {
 	get(): T,
 	set(newValue: T): void,
 	locked(): boolean
 }
 
-interface WargObservable<T> extends BasicObservable<T> {
+export interface WargObservable<T> extends BasicObservable<T> {
 	subscribe(cb: (T) => void): () => void,
 	map<R>(fn: (T) => R): WargObservable<R>
 }

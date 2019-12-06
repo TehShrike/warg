@@ -1,3 +1,7 @@
+# 2.1.0
+
+- Export `BasicObservable` and `WargObservable`
+
 # 2.0.2
 
 - Generate type definitions
