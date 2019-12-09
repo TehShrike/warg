@@ -11,12 +11,12 @@ npm i warg
 ```
 
 CommonJS:
-```
+```ts
 const { value, computed } = require('warg')
 ```
 
 ESM:
-```
+```ts
 import { value, computed } from 'warg'
 ```
 
