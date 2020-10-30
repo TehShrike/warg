@@ -41,7 +41,7 @@ multipliedArray.get() // => [ 2, 4, 6, 84, 138 ]
 
 ### `wargObservable = value(initialValue)`
 
-Returns a warg observable with a set method.
+Returns a warg observable with a `set` method.
 
 ```js
 const wat = value('sup')
