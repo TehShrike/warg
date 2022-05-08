@@ -7,8 +7,8 @@ export interface BasicObservable<T> extends Emitter {
 }
 
 export interface WargObservable<T> extends BasicObservable<T> {
-	subscribe(cb: (T) => void): () => void,
-	map<R>(fn: (T) => R): WargObservable<R>
+	subscribe(cb: (value: T) => void): () => void,
+	map<R>(fn: (value: T) => R): WargObservable<R>
 }
 
 type DependencyObject<T extends { [key: string]: any }> = {
@@ -90,14 +90,14 @@ export const computed = <D extends { [key: string]: any }, T>(dependencies: Depe
 	})
 }
 
-type Resolved<T>  = {
-	[key in keyof T]: ReturnType<DependencyObject<T>[key]["get"]>
+type Resolved<T> = {
+	[key in keyof T]: T[key]
 }
 
 const resolve = <D extends { [key: string]: any }, Values extends Resolved<D>>(dependencies: DependencyObject<D>): Values =>
 	Object.entries(dependencies).reduce((previous, [ key, dependency ]) => ({
 		...previous,
-		[key]: dependency.get()
+		[key]: dependency.get(),
 	}), {} as Values)
 
 const allDependenciesAreUnlocked = (dependencies: DependencyObject<any>) => Object.values(dependencies).every(
