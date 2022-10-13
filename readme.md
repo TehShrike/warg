@@ -82,7 +82,7 @@ Returns the current value.
 
 #### `newWargObservable = wargObservable.map(computeFunction)`
 
-Sugar for `newWargObservable = wargObservable.compute({ observable }, ({ observable }) => computeFunction(observable))`.
+Sugar for `newWargObservable = computed({ wargObservable }, ({ wargObservable }) => computeFunction(wargObservable))`.
 
 ```js
 const a = value(6)
