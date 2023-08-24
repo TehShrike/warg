@@ -55,7 +55,7 @@ wat.get() // => 'dawg'
 
 ### `wargObservable = computed(dependencies, computeFunction)`
 
-Returns a warg observable that takes in an object of dependencies and returns a new warg observable that combines them together with your given function.
+Takes in an object of dependency observables and returns a new warg observable that combines them together with your given function.
 
 ```js
 const small = value(1)
